@@ -400,7 +400,7 @@ void des_dec(des_ctx *dc, unsigned char *data, int blocks) {
 }
 
 int genPlain(void) {
-  des_ctx dc;
+  des_ctx dc1, dc2, dc3;
   // Open the file containing the keys.
   FILE *keyFile = fopen("Key.txt", "r");
   if (keyFile == NULL) {
@@ -416,19 +416,26 @@ int genPlain(void) {
   }
 
   // Apply each key to each plain text phrase, storing the resulting ciphertext in files.
-  char key[MAX_LINE_LEN];
+  char k1[MAX_LINE_LEN];
+  char k2[MAX_LINE_LEN];
+  char k3[MAX_LINE_LEN];
   char ciphertext[MAX_LINE_LEN];
   char* cp;
-  int keyIndex = 1;
-  while (fgets(key, sizeof(key), keyFile)) {
-    // Initialize this key.
-    des_key(&dc, key);
+  int keySetIndex = 1;
+  while (1) {
+    // Initialize keys.
+    fgets(k1, sizeof(k1), keyFile);
+    fgets(k2, sizeof(k2), keyFile);
+    fgets(k3, sizeof(k3), keyFile);
+    des_key(&dc1, k1);
+    des_key(&dc2, k2);
+    des_key(&dc3, k3);
 
     // Construct the names of the plaintext output file.
     char plainpre[32] = "Plaintextout";
     char indexStr[4];
     char* post = ".txt";
-    sprintf(indexStr, "%d", keyIndex);
+    sprintf(indexStr, "%d", keySetIndex);
     strcat(plainpre, indexStr);
     strcat(plainpre, post);
 
@@ -442,14 +449,18 @@ int genPlain(void) {
     while (fgets(ciphertext, sizeof(ciphertext), ciphertextinFile)) {
       // Encrypt each plaintext phrase with this key and store it in the ciphertext file.
       cp = ciphertext;
-      des_dec(&dc, cp, 1);
+      des_dec(&dc3, cp, 1);
+      des_enc(&dc2, cp, 1);
+      des_dec(&dc1, cp, 1);
       fputs(cp, plaintextoutFile);
     }
 
     // Close these output files, rewind the plaintext file pointer, and iterate to the next key.
     rewind(ciphertextinFile);
     fclose(plaintextoutFile);
-    keyIndex++;
+    if (++keySetIndex == 5) {
+      break;
+    }
   }
 
   // Close files and return a 0 to indicate success.
@@ -458,7 +469,7 @@ int genPlain(void) {
   return 0;
 }
 
-int chooseCipher(int numKeys) {
+int chooseCipher(int numKeySets) {
   // Open the Ciphertextin.txt file for writing.
   FILE *ciphertextinFile = fopen("Ciphertextin.txt", "w");
   if (ciphertextinFile == NULL) {
@@ -466,7 +477,7 @@ int chooseCipher(int numKeys) {
     return -1;
   }
 
-  for (int i = 1; i < numKeys; i++) {
+  for (int i = 1; i <= numKeySets; i++) {
     // Construct the names of the ciphertext file to open.
     char cipherpre[32] = "Ciphertextout";
     char indexStr[4];
@@ -559,7 +570,7 @@ int genCipher(void) {
   // Close files and return the number of keys used to indicate success.
   fclose(plaintextFile);
   fclose(keyFile);
-  return keySetIndex * 3;
+  return keySetIndex;
 }
 
 int applySbox(unsigned char val) {
