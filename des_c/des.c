@@ -409,7 +409,7 @@ int genPlain(void) {
   }
 
   // Open the file containing the ciphertext phrases.
-  FILE *ciphertextinFile = fopen("Ciphertextin.txt", "r");
+  FILE *ciphertextinFile = fopen("Ciphertextin.txt", "rb");
   if (ciphertextinFile == NULL) {
     perror("Failed to open Ciphertextin.txt");
     return -1;
@@ -441,13 +441,13 @@ int genPlain(void) {
     strcat(plainpre, post);
 
     // Open the output file.
-    FILE *plaintextoutFile = fopen(plainpre, "w");
+    FILE *plaintextoutFile = fopen(plainpre, "wb");
     if (plaintextoutFile == NULL) {
       perror("Failed to create plaintext output file");
       return -1;
     }
 
-    while (fgets(ciphertext, sizeof(ciphertext), ciphertextinFile)) {
+    while (fread(ciphertext, 1, 8, ciphertextinFile) == 8) {
       // TRIPLE DES CHANGE HERE
       // Encrypt each plaintext phrase with this key and store it in the ciphertext file.
       cp = ciphertext;
@@ -460,7 +460,7 @@ int genPlain(void) {
     // Close these output files, rewind the plaintext file pointer, and iterate to the next key.
     rewind(ciphertextinFile);
     fclose(plaintextoutFile);
-    if (++keySetIndex == 5) {
+    if (keySetIndex++ == 5) {
       break;
     }
   }
@@ -479,6 +479,7 @@ int chooseCipher(int numKeySets) {
     return -1;
   }
 
+  int totalBytesWritten = 0;
   for (int i = 1; i <= numKeySets; i++) {
     // Construct the names of the ciphertext file to open.
     char cipherpre[32] = "Ciphertextout";
@@ -496,8 +497,14 @@ int chooseCipher(int numKeySets) {
     }
 
     // Read out the ciphertext line and write it to the Ciphertextin.txt file.
-    char ciphertext[MAX_LINE_LEN];
-    fgets(ciphertext, sizeof(ciphertext), ciphertextFile);
+    unsigned char ciphertext[9];
+    int cipherBytes = fread(ciphertext, 1, 8, ciphertextFile);
+    if (cipherBytes != 8) {
+      printf("Failed to read exactly 8 bytes.\n");
+      return -1;
+    }
+    totalBytesWritten += cipherBytes;
+    printf("%d bytes written to ciphertextinFile\n", totalBytesWritten);
     fputs(ciphertext, ciphertextinFile);
     fclose(ciphertextFile);
   }
