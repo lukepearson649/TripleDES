@@ -471,7 +471,7 @@ int genPlain(void) {
 
 int chooseCipher(int numKeySets) {
   // Open the Ciphertextin.txt file for writing.
-  FILE *ciphertextinFile = fopen("Ciphertextin.txt", "w");
+  FILE *ciphertextinFile = fopen("Ciphertextin.txt", "wb");
   if (ciphertextinFile == NULL) {
     perror("Failed to create Ciphertextin.txt");
     return -1;
@@ -487,7 +487,7 @@ int chooseCipher(int numKeySets) {
     strcat(cipherpre, post);
 
     // Open the ciphertext file.
-    FILE *ciphertextFile = fopen(cipherpre, "r");
+    FILE *ciphertextFile = fopen(cipherpre, "rb");
     if (ciphertextFile == NULL) {
       perror("Failed to open ciphertext file");
       return -1;
@@ -544,7 +544,7 @@ int genCipher(void) {
     strcat(cipherpre, post);
 
     // Open the output file.
-    FILE *ciphertextFile = fopen(cipherpre, "w");
+    FILE *ciphertextFile = fopen(cipherpre, "wb");
     if (ciphertextFile == NULL) {
       perror("Failed to create ciphertext output file");
       return -1;
@@ -587,12 +587,6 @@ int applySbox(unsigned char val) {
 
 void main (void)
 {
-  // unsigned char inputs[] = {0x0F, 0x37, 0x25, 0x10};
-  // for (int i = 0; i < 4; i++) {
-  //   int sub = applySbox(inputs[i]);
-  //   printf("Input: 0x%x -> Output: %d (0x%x)\n", inputs[i], sub, sub);
-  // }
-
   // Generate the ciphertext output files.
   int numKeys = genCipher();
   if (numKeys == -1) {
@@ -616,42 +610,4 @@ void main (void)
   } else {
     printf("Successfully generated plaintext files.\n");
   }
-
-  // des_ctx dc;
-  // int i;
-  // unsigned long data[10];
-
-  // char *cp, key[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
-  // char x[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xe7};
-  // char *cp, key[8] = {0x12, 0x34, 0x56, 0x78, 0x12, 0x34, 0x56, 0x78};
-  // char x[8] = {0x61, 0x62, 0x63, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-  // cp = x;
-
-  // des_key(&dc, key);
-  // des_enc(&dc, cp, 1);
-  // printf("Enc(0..7, 0..7) = ");
-  // for (i=0; i<8; i++)
-  //   printf("%02x ", ((unsigned int) cp[i])&0x00ff);
-  // printf("\n");
-
-  // des_dec(&dc, cp, 1);
-
-  // printf("Dec(above, 0..7) = ");
-  // for (i=0; i<8; i++)
-  //   printf("%02x ", ((unsigned int)cp[i])&0x00ff);
-  // printf("\n");
-
-  // cp = (char *) data;
-  // for (i=0; i<10; i++)
-  //   data[i] = i;
-
-  // des_enc(&dc, cp, 5);  /* Enc 5 blocks. */
-  // for(i=0; i<10; i+=2)
-  //   printf("Block %01d = %08lx %08lx.\n", i/2, data[i], data[i+1]);
-
-  // des_dec(&dc, cp, 1);
-  // des_dec(&dc, cp+8, 4);
-  // for (i=0; i<10; i+=2)
-  //   printf("Block %01d = %08lx %08lx.\n", i/2, data[i], data[i+1]);
 }
