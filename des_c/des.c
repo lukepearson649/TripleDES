@@ -423,6 +423,7 @@ int genPlain(void) {
   char* cp;
   int keySetIndex = 1;
   while (1) {
+    // TRIPLE DES CHANGE HERE
     // Initialize keys.
     fgets(k1, sizeof(k1), keyFile);
     fgets(k2, sizeof(k2), keyFile);
@@ -447,6 +448,7 @@ int genPlain(void) {
     }
 
     while (fgets(ciphertext, sizeof(ciphertext), ciphertextinFile)) {
+      // TRIPLE DES CHANGE HERE
       // Encrypt each plaintext phrase with this key and store it in the ciphertext file.
       cp = ciphertext;
       des_dec(&dc3, cp, 1);
@@ -527,6 +529,7 @@ int genCipher(void) {
   char* cp;
   int keySetIndex = 1;
   while (1) {
+    // TRIPLE DES CHANGE HERE
     // Initialize keys.
     fgets(k1, sizeof(k1), keyFile);
     fgets(k2, sizeof(k2), keyFile);
@@ -551,6 +554,7 @@ int genCipher(void) {
     }
 
     while (fgets(plaintext, sizeof(plaintext), plaintextFile)) {
+      // TRIPLE DES CHANGE HERE
       // Encrypt each plaintext phrase with this key set and store it in the ciphertext file.
       cp = plaintext;
       des_enc(&dc1, cp, 1);
